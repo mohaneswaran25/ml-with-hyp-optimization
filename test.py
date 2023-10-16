@@ -80,7 +80,7 @@ def build_model(df):
     st.subheader("After Data Preprocessing Dataset")
     st.write(df)
     # Data splitting
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=(100-split_size)/100))
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=(100-split_size)/100)
     
     st.markdown('**Data splits**:')
     st.write('Training set')
