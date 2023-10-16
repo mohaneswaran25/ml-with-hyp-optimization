@@ -34,7 +34,7 @@ st.sidebar.header('Set Parameters')
 split_size = st.sidebar.slider('Data split ratio (% for Training Set)', 10, 90, 80, 5)
 
 st.sidebar.subheader('Learning Parameters')
-parameter_n_estimators = st.sidebar.slider('Number of estimators (n_estimators)', 0, 1000,100,50)
+parameter_n_estimators = st.sidebar.slider('Number of estimators (n_estimators)', 1, 1000,100,50)
 #parameter_n_estimators_step = st.sidebar.number_input('Step size for n_estimators', 50)
 st.sidebar.write('---')
 parameter_max_features = st.sidebar.slider('Max features (max_features)', 1, 50,3,1)
@@ -51,7 +51,7 @@ parameter_oob_score = st.sidebar.select_slider('Whether to use out-of-bag sample
 parameter_n_jobs = st.sidebar.select_slider('Number of jobs to run in parallel (n_jobs)', options=[1, -1])
 
 
-n_estimators_range = np.arange(0, 100, 50)
+n_estimators_range = np.arange(1, 100, 50)
 max_features_range = np.arange(1, 3, 1)
 param_grid = dict(max_features=max_features_range, n_estimators=n_estimators_range)
 
