@@ -31,7 +31,7 @@ uploaded_file = st.sidebar.file_uploader("Upload your input CSV file", type=["cs
 
 # Sidebar - Specify parameter settings
 st.sidebar.header('Set Parameters')
-split_size = st.sidebar.slider('Data split ratio (% for Training Set)', 10, 90, 80, 5)
+split_size = st.sidebar.slider('Data split ratio (% for Training Set)', 0.1, 0.9, 0.8,0.05)
 
 st.sidebar.subheader('Learning Parameters')
 parameter_n_estimators = st.sidebar.slider('Number of estimators (n_estimators)', 0, 500, (10,50), 50)
@@ -80,7 +80,7 @@ def build_model(df):
     st.subheader("After Data Preprocessing Dataset")
     st.write(df)
     # Data splitting
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_size)
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, train_size=split_size)
     
     st.markdown('**Data splits**:')
     st.write('Training set')
@@ -95,9 +95,9 @@ def build_model(df):
     st.info(Y.name)
 
     #Model building
-    rf = RandomForestRegressor(n_estimators=100,
+    rf = RandomForestRegressor(n_estimators=parameter_n_estimators,
         random_state=parameter_random_state,
-        max_features=1.0,
+        max_features=parameter_max_features,
         criterion=parameter_criterion,
         min_samples_split=parameter_min_samples_split,
         min_samples_leaf=parameter_min_samples_leaf,
@@ -137,14 +137,14 @@ def build_model(df):
     # Segment data into groups based on the 2 hyperparameters
     grid_results = pd.concat([pd.DataFrame(grid.cv_results_["params"]),pd.DataFrame(grid.cv_results_["mean_test_score"], columns=["R2"])],axis=1)
     # Segment data into groups based on the 2 hyperparameters
-    grid_contour = grid_results.groupby(['max1_features','n1_estimators']).mean()
+    grid_contour = grid_results.groupby(['max_features','n_estimators']).mean()
     # Pivoting the data
     grid_reset = grid_contour.reset_index()
-    grid_reset.columns = ['max1_features', 'n1_estimators', 'R2']
+    grid_reset.columns = ['max_features', 'n_estimators', 'R2']
     grid_reset = grid_reset.fillna(0)
-    grid_reset['max1_features'] = grid_reset['max1_features'].astype(int)  # Convert to integer if they are not already.
-    grid_reset['n1_estimators'] = grid_reset['n1_estimators'].astype(int)
-    grid_pivot = grid_reset.pivot_table(index='max1_features', columns='n1_estimators')
+    grid_reset['max_features'] = grid_reset['max_features'].astype(int)  # Convert to integer if they are not already.
+    grid_reset['n_estimators'] = grid_reset['n_estimators'].astype(int)
+    grid_pivot = grid_reset.pivot_table(index='max_features', columns='n_estimators')
     x = grid_pivot.columns.levels[1].values
     y = grid_pivot.index.values
     z = grid_pivot.values
@@ -162,8 +162,8 @@ def build_model(df):
     fig = go.Figure(data= [go.Surface(z=z, y=y, x=x)], layout=layout )
     fig.update_layout(title='Hyperparameter tuning',
                       scene = dict(
-                        xaxis_title='n1_estimators',
-                        yaxis_title='max1_features',
+                        xaxis_title='n_estimators',
+                        yaxis_title='max_features',
                         zaxis_title='R2'),
                       autosize=False,
                       width=800, height=800,
