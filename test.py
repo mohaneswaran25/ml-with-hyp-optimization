@@ -34,13 +34,11 @@ st.sidebar.header('Set Parameters')
 split_size = st.sidebar.slider('Data split ratio (% for Training Set)', 10, 90, 80, 5)
 
 st.sidebar.subheader('Learning Parameters')
-#parameter_n_estimators= st.sidebar.slider('Number of estimators (n_estimators)',0, 1000, 100, 100)
-parameter_n1_estimators = st.sidebar.slider('Number of estimators (n1_estimators)', 0, 500, (10,50), 50)
-parameter_n1_estimators_step = st.sidebar.number_input('Step size for n1_estimators', 50)
+parameter_n_estimators = st.sidebar.slider('Number of estimators (n_estimators)', 0, 500, (10,50), 50)
+parameter_n_estimators_step = st.sidebar.number_input('Step size for n_estimators', 50)
 st.sidebar.write('---')
-#parameter_max_features = st.sidebar.select_slider('Max features (max_features)', options=['auto', 'sqrt', 'log2'])
-parameter_max1_features = st.sidebar.slider('Max features (max1_features)', 1, 50, (1,3), 1)
-st.sidebar.number_input('Step size for max1_features', 1)
+parameter_max_features = st.sidebar.slider('Max features (max_features)', 1, 50, (1,3), 1)
+st.sidebar.number_input('Step size for max_features', 1)
 st.sidebar.write('---')
 parameter_min_samples_split = st.sidebar.slider('Minimum number of samples required to split an internal node (min_samples_split)', 1, 10, 2, 1)
 parameter_min_samples_leaf = st.sidebar.slider('Minimum number of samples required to be at a leaf node (min_samples_leaf)', 1, 10, 2, 1)
@@ -53,9 +51,9 @@ parameter_oob_score = st.sidebar.select_slider('Whether to use out-of-bag sample
 parameter_n_jobs = st.sidebar.select_slider('Number of jobs to run in parallel (n_jobs)', options=[1, -1])
 
 
-n1_estimators_range = np.arange(parameter_n1_estimators[0], parameter_n1_estimators[1]+parameter_n1_estimators_step, parameter_n1_estimators_step)
-max1_features_range = np.arange(parameter_max1_features[0], parameter_max1_features[1]+1, 1)
-param_grid = dict(max1_features=max1_features_range, n1_estimators=n1_estimators_range)
+n_estimators_range = np.arange(parameter_n_estimators[0], parameter_n_estimators[1]+parameter_n_estimators_step, parameter_n_estimators_step)
+max_features_range = np.arange(parameter_max_features[0], parameter_max_features[1]+1, 1)
+param_grid = dict(max_features=max_features_range, n_estimators=n_estimators_range)
 
 #---------------------------------#
 # Main panel
@@ -74,7 +72,7 @@ def filedownload(df):
     href = f'<a href="data:file/csv;base64,{b64}" download="model_performance.csv">Download CSV File</a>'
     return href
 
-def build_model(df):
+def build_model(df=df5):
     
     X = df.iloc[:,:-1] # Using all column except for the last column as X
     Y = df.iloc[:,-1] # Selecting the last column as Y
@@ -106,29 +104,7 @@ def build_model(df):
         bootstrap=parameter_bootstrap,
         oob_score=parameter_oob_score,
         n_jobs=parameter_n_jobs)
-    rf.fit(X_train, Y_train)
-
-    st.subheader(' Model Performance')
-
-    st.markdown('**Training set**:')
-    Y_pred_train = rf.predict(X_train)
-    st.write('Coefficient of determination ($R^2$):')
-    st.info( r2_score(Y_train, Y_pred_train) )
-
-    st.write('Error (MSE or MAE):')
-    st.info( mean_squared_error(Y_train, Y_pred_train) )
-
-    st.markdown('**Test set**:')
-    Y_pred_test = rf.predict(X_test)
-    st.write('Coefficient of determination ($R^2$):')
-    st.info( r2_score(Y_test, Y_pred_test) )
-
-    st.write('Error (MSE or MAE):')
-    st.info( mean_squared_error(Y_test, Y_pred_test) )
-
-    st.subheader('Model Parameters')
-    st.write(rf.get_params())
-    
+ 
     #Hyperparameter optimization
     st.write("After Hyperparameter Optimization")
     grid = GridSearchCV(estimator=rf, param_grid=param_grid, cv=5)
@@ -220,8 +196,8 @@ if uploaded_file is not None:
     df3.drop_duplicates(inplace=True)
     encoder = ce.CountEncoder()
     df4=encoder.fit_transform(df3)
-    df=df4[a]
-    build_model(df)
+    df5=df4[a]
+    build_model(df5)
 else:
     st.info('Awaiting for CSV file to be uploaded.')
     
