@@ -73,22 +73,7 @@ def filedownload(df):
     return href
 
 def build_model(df):
-    a=list(df.columns)
-    cols_1=df.select_dtypes(include=['object']).columns
-    cols_2=df.select_dtypes(include=["number"]).columns
-    df1=df.select_dtypes(include=['object'])
-    df2=df.select_dtypes(include=["number"])
-    imp_1=SimpleImputer(missing_values = np.nan, strategy ='most_frequent')
-    df1=imp_1.fit_transform(df.select_dtypes(include=['object']))
-    df1=pd.DataFrame(df1,columns=cols_1)
-    imp_2=SimpleImputer(missing_values = np.nan,  strategy ='median')
-    df2=imp_2.fit_transform(df.select_dtypes(include=['number']))
-    df2=pd.DataFrame(df2,columns=cols_2)
-    df3=pd.concat([df1,df2],axis=1)
-    df3.drop_duplicates(inplace=True)
-    encoder = ce.CountEncoder()
-    df4=encoder.fit_transform(df3)
-    df5=df4[a]
+    
     X = df5.iloc[:,:-1] # Using all column except for the last column as X
     Y = df5.iloc[:,-1] # Selecting the last column as Y
     
@@ -218,7 +203,23 @@ def build_model(df):
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     st.write(df)
-    build_model(df)
+    a=list(df.columns)
+    cols_1=df.select_dtypes(include=['object']).columns
+    cols_2=df.select_dtypes(include=["number"]).columns
+    df1=df.select_dtypes(include=['object'])
+    df2=df.select_dtypes(include=["number"])
+    imp_1=SimpleImputer(missing_values = np.nan, strategy ='most_frequent')
+    df1=imp_1.fit_transform(df.select_dtypes(include=['object']))
+    df1=pd.DataFrame(df1,columns=cols_1)
+    imp_2=SimpleImputer(missing_values = np.nan,  strategy ='median')
+    df2=imp_2.fit_transform(df.select_dtypes(include=['number']))
+    df2=pd.DataFrame(df2,columns=cols_2)
+    df3=pd.concat([df1,df2],axis=1)
+    df3.drop_duplicates(inplace=True)
+    encoder = ce.CountEncoder()
+    df4=encoder.fit_transform(df3)
+    df5=df4[a]
+    build_model(df5)
 else:
     st.info('Awaiting for CSV file to be uploaded.')
     
