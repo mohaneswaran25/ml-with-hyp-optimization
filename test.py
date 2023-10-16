@@ -34,11 +34,13 @@ st.sidebar.header('Set Parameters')
 split_size = st.sidebar.slider('Data split ratio (% for Training Set)', 10, 90, 80, 5)
 
 st.sidebar.subheader('Learning Parameters')
-parameter_n_estimators = st.sidebar.slider('Number of estimators (n_estimators)', 1, 1000,100,50)
-#parameter_n_estimators_step = st.sidebar.number_input('Step size for n_estimators', 50)
+parameter_n_estimators= st.sidebar.slider('Number of estimators (n_estimators)',0, 1000, 100, 100)
+parameter_n1_estimators = st.sidebar.slider('Number of estimators (n1_estimators)', 0, 500, (10,50), 50)
+parameter_n1_estimators_step = st.sidebar.number_input('Step size for n1_estimators', 50)
 st.sidebar.write('---')
-parameter_max_features = st.sidebar.slider('Max features (max_features)', 1, 50,3,1)
-#st.sidebar.number_input('Step size for max_features', 1)
+parameter_max_features = st.sidebar.select_slider('Max features (max_features)', options=['auto', 'sqrt', 'log2'])
+parameter_max1_features = st.sidebar.slider('Max features (max1_features)', 1, 50, (1,3), 1)
+st.sidebar.number_input('Step size for max1_features', 1)
 st.sidebar.write('---')
 parameter_min_samples_split = st.sidebar.slider('Minimum number of samples required to split an internal node (min_samples_split)', 1, 10, 2, 1)
 parameter_min_samples_leaf = st.sidebar.slider('Minimum number of samples required to be at a leaf node (min_samples_leaf)', 1, 10, 2, 1)
@@ -51,9 +53,9 @@ parameter_oob_score = st.sidebar.select_slider('Whether to use out-of-bag sample
 parameter_n_jobs = st.sidebar.select_slider('Number of jobs to run in parallel (n_jobs)', options=[1, -1])
 
 
-n_estimators_range = np.arange(1, 100, 50)
-max_features_range = np.arange(1, 3, 1)
-param_grid = dict(max_features=max_features_range, n_estimators=n_estimators_range)
+n1_estimators_range = np.arange(parameter_n1_estimators[0], parameter_n1_estimators[1]+parameter_n1_estimators_step, parameter_n1_estimators_step)
+max1_features_range = np.arange(parameter_max1_features[0], parameter_max1_features[1]+1, 1)
+param_grid = dict(max1_features=max1_features_range, n1_estimators=n1_estimators_range)
 
 #---------------------------------#
 # Main panel
@@ -74,11 +76,11 @@ def filedownload(df):
 
 def build_model(df):
     
-    X = df5.iloc[:,:-1] # Using all column except for the last column as X
-    Y = df5.iloc[:,-1] # Selecting the last column as Y
+    X = df.iloc[:,:-1] # Using all column except for the last column as X
+    Y = df.iloc[:,-1] # Selecting the last column as Y
     
     st.subheader("After Data Preprocessing Dataset")
-    st.write(df5)
+    st.write(df)
     # Data splitting
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=split_size)
     
@@ -159,14 +161,14 @@ def build_model(df):
     # Segment data into groups based on the 2 hyperparameters
     grid_results = pd.concat([pd.DataFrame(grid.cv_results_["params"]),pd.DataFrame(grid.cv_results_["mean_test_score"], columns=["R2"])],axis=1)
     # Segment data into groups based on the 2 hyperparameters
-    grid_contour = grid_results.groupby(['max_features','n_estimators']).mean()
+    grid_contour = grid_results.groupby(['max1_features','n1_estimators']).mean()
     # Pivoting the data
     grid_reset = grid_contour.reset_index()
-    grid_reset.columns = ['max_features', 'n_estimators', 'R2']
+    grid_reset.columns = ['max1_features', 'n1_estimators', 'R2']
     grid_reset = grid_reset.fillna(0)
-    grid_reset['max_features'] = grid_reset['max_features'].astype(int)  # Convert to integer if they are not already.
-    grid_reset['n_estimators'] = grid_reset['n_estimators'].astype(int)
-    grid_pivot = grid_reset.pivot_table(index='max_features', columns='n_estimators')
+    grid_reset['max1_features'] = grid_reset['max1_features'].astype(int)  # Convert to integer if they are not already.
+    grid_reset['n1_estimators'] = grid_reset['n1_estimators'].astype(int)
+    grid_pivot = grid_reset.pivot_table(index='max1_features', columns='n1_estimators')
     x = grid_pivot.columns.levels[1].values
     y = grid_pivot.index.values
     z = grid_pivot.values
@@ -184,8 +186,8 @@ def build_model(df):
     fig = go.Figure(data= [go.Surface(z=z, y=y, x=x)], layout=layout )
     fig.update_layout(title='Hyperparameter tuning',
                       scene = dict(
-                        xaxis_title='n_estimators',
-                        yaxis_title='max_features',
+                        xaxis_title='n1_estimators',
+                        yaxis_title='max1_features',
                         zaxis_title='R2'),
                       autosize=False,
                       width=800, height=800,
@@ -218,8 +220,8 @@ if uploaded_file is not None:
     df3.drop_duplicates(inplace=True)
     encoder = ce.CountEncoder()
     df4=encoder.fit_transform(df3)
-    df5=df4[a]
-    build_model(df5)
+    df=df4[a]
+    build_model(df)
 else:
     st.info('Awaiting for CSV file to be uploaded.')
     
