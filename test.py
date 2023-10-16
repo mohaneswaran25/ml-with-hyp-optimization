@@ -72,7 +72,7 @@ def filedownload(df):
     href = f'<a href="data:file/csv;base64,{b64}" download="model_performance.csv">Download CSV File</a>'
     return href
 
-def build_model(df=df5):
+def build_model(df):
     
     X = df.iloc[:,:-1] # Using all column except for the last column as X
     Y = df.iloc[:,-1] # Selecting the last column as Y
@@ -197,7 +197,7 @@ if uploaded_file is not None:
     encoder = ce.CountEncoder()
     df4=encoder.fit_transform(df3)
     df5=df4[a]
-    build_model(df5)
+    build_model(df=df5)
 else:
     st.info('Awaiting for CSV file to be uploaded.')
     
