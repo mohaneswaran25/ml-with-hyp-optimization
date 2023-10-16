@@ -34,11 +34,11 @@ st.sidebar.header('Set Parameters')
 split_size = st.sidebar.slider('Data split ratio (% for Training Set)', 10, 90, 80, 5)
 
 st.sidebar.subheader('Learning Parameters')
-parameter_n_estimators= st.sidebar.slider('Number of estimators (n_estimators)',0, 1000, 100, 100)
+#parameter_n_estimators= st.sidebar.slider('Number of estimators (n_estimators)',0, 1000, 100, 100)
 parameter_n1_estimators = st.sidebar.slider('Number of estimators (n1_estimators)', 0, 500, (10,50), 50)
 parameter_n1_estimators_step = st.sidebar.number_input('Step size for n1_estimators', 50)
 st.sidebar.write('---')
-parameter_max_features = st.sidebar.select_slider('Max features (max_features)', options=['auto', 'sqrt', 'log2'])
+#parameter_max_features = st.sidebar.select_slider('Max features (max_features)', options=['auto', 'sqrt', 'log2'])
 parameter_max1_features = st.sidebar.slider('Max features (max1_features)', 1, 50, (1,3), 1)
 st.sidebar.number_input('Step size for max1_features', 1)
 st.sidebar.write('---')
@@ -97,9 +97,9 @@ def build_model(df):
     st.info(Y.name)
 
     #Model building
-    rf = RandomForestRegressor(n_estimators=parameter_n_estimators,
+    rf = RandomForestRegressor(n_estimators=100,
         random_state=parameter_random_state,
-        max_features=parameter_max_features,
+        max_features=1.0,
         criterion=parameter_criterion,
         min_samples_split=parameter_min_samples_split,
         min_samples_leaf=parameter_min_samples_leaf,
