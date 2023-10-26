@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import StandardScaler
 
 #---------------------------------#
 # Page layout
@@ -73,12 +74,31 @@ def filedownload(df):
     return href
 
 def build_model(df):
+    a=list(df.columns)
+    cols_1=df.select_dtypes(include=['object']).columns
+    cols_2=df.select_dtypes(include=["number"]).columns
+    df1=df.select_dtypes(include=['object'])
+    df2=df.select_dtypes(include=["number"])
+    imp_1=SimpleImputer(missing_values = np.nan, strategy ='most_frequent')
+    df1=imp_1.fit_transform(df.select_dtypes(include=['object']))
+    df1=pd.DataFrame(df1,columns=cols_1)
+    imp_2=SimpleImputer(missing_values = np.nan,  strategy ='median')
+    df2=imp_2.fit_transform(df.select_dtypes(include=['number']))
+    df2=pd.DataFrame(df2,columns=cols_2)
+    df3=pd.concat([df1,df2],axis=1)
+    df3.drop_duplicates(inplace=True)
+    encoder = ce.OrdinalEncoder()
+    df4=encoder.fit_transform(df3)
+    df5=df4[a]
+    scaler = StandardScaler()
+    df5=scaler.fit_transform(df5)
+    df5=pd.DataFrame(df5,columns=a)
     
-    X = df.iloc[:,:-1] # Using all column except for the last column as X
-    Y = df.iloc[:,-1] # Selecting the last column as Y
+    X = df5.iloc[:,:-1] # Using all column except for the last column as X
+    Y = df5.iloc[:,-1] # Selecting the last column as Y
     
     st.subheader("After Data Preprocessing Dataset")
-    st.write(df)
+    st.write(df5)
     # Data splitting
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=(100-split_size)/100)
     
@@ -181,23 +201,8 @@ def build_model(df):
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     st.write(df)
-    a=list(df.columns)
-    cols_1=df.select_dtypes(include=['object']).columns
-    cols_2=df.select_dtypes(include=["number"]).columns
-    df1=df.select_dtypes(include=['object'])
-    df2=df.select_dtypes(include=["number"])
-    imp_1=SimpleImputer(missing_values = np.nan, strategy ='most_frequent')
-    df1=imp_1.fit_transform(df.select_dtypes(include=['object']))
-    df1=pd.DataFrame(df1,columns=cols_1)
-    imp_2=SimpleImputer(missing_values = np.nan,  strategy ='median')
-    df2=imp_2.fit_transform(df.select_dtypes(include=['number']))
-    df2=pd.DataFrame(df2,columns=cols_2)
-    df3=pd.concat([df1,df2],axis=1)
-    df3.drop_duplicates(inplace=True)
-    encoder = ce.CountEncoder()
-    df4=encoder.fit_transform(df3)
-    df5=df4[a]
-    build_model(df=df5)
+    
+    build_model(df)
 else:
     st.info('Awaiting for CSV file to be uploaded.')
     
